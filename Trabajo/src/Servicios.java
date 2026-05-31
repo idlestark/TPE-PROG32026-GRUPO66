@@ -2,12 +2,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public class Servicios {
 
+    private HashMap<String, Paquete> paquetesPorCodigo = new HashMap<>();
 
-
+    //private TreeMap<Integer, List<Paquete>> paquetesPorUrgencia = new TreeMap<>(); //preguntar si usar un árbol en servicio 3
     public Servicios(String pathCamiones, String pathPaquetes) {
         cargarCamiones(pathCamiones);
         cargarPaquetes(pathPaquetes);
@@ -47,17 +50,35 @@ public class Servicios {
     }
 
     /*
-     * Complejidad  servicio 1.
+     * Complejidad  O(1) debido a que es un acceso directo a un HashMap.
      */
-    public Paquete servicio1(String codigoPaquete) { return null; }
+    public Paquete servicio1(String codigoPaquete) {
+        return paquetesPorCodigo.get(codigoPaquete);
+    }
 
     /*
-     * Complejidad temporal del servicio 2.
+     * Complejidad O(n) debido a que se utiliza un bucle for para recorrer el arreglo de paquetes.
      */
-    public List<Paquete> servicio2(boolean contieneAlimentos) { return null; }
+    public List<Paquete> servicio2(boolean contieneAlimentos) {
+        List<Paquete> paquetes = new ArrayList<>();
+        for(Paquete p : paquetesPorCodigo.values()) {
+            if(p.contieneAlimentos() == contieneAlimentos) {
+                paquetes.add(p);
+            }
+        }
+        return paquetes;
+    }
 
     /*
-     * Complejidad temporal del servicio 3.
+     * Complejidad O(n) debido a que se utiliza un bucle for para recorrer el arreglo de paquetes.
      */
-    public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) { return null; }
+    public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
+        List<Paquete> paquetes = new ArrayList<>();
+        for(Paquete p : paquetesPorCodigo.values()) {
+            if(p.getNivelUrgencia() >= urgenciaMinima && p.getNivelUrgencia() <= urgenciaMaxima) {
+                paquetes.add(p);
+            }
+        }
+        return paquetes;
+    }
 }
