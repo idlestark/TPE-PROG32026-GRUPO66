@@ -10,7 +10,9 @@ public class Servicios {
 
     private HashMap<String, Paquete> paquetesPorCodigo = new HashMap<>();
 
-    //private TreeMap<Integer, List<Paquete>> paquetesPorUrgencia = new TreeMap<>(); //preguntar si usar un árbol en servicio 3
+    //private TreeMap<Integer, List<Paquete>> paquetesPorUrgencia = new TreeMap<>();
+    //En el servicio 2 podemos poner 2 listas o un hash con lista de factoreo
+    //para calcular costo computacional del constructor, evaluar el costo de cargarcamiones y cargar paquetes y de ahí viene el costo
     public Servicios(String pathCamiones, String pathPaquetes) {
         cargarCamiones(pathCamiones);
         cargarPaquetes(pathPaquetes);
