@@ -1,31 +1,42 @@
 import java.util.*;
 
+
+
+//Reemplazar con clase Carga para eliminar el getPeso(), agregar poda de si nuestra solucion actual tiene
+// más peso en el camion
+//de descarte que la mejor solucion
+
+
 public class Backtracking {
     private HashMap<Camion, List<Paquete>> MejorSolucion = new HashMap<>();
     private double mejorPesoNoAsignado;
     private int estadosGenerados;
 
+
     private List<Camion> camiones;
     private List<Paquete> paquetes;
+    private Camion camionDescarte;
 
 
     /*
      * Estrategia de resolucion: se exploran todas las combinaciones posibles
      * de asignacion de paquetes a camiones mediante recursion. Para cada
-     * camion se prueban todas las asignaciones validas de paquetes (que
-     * cumplan las restricciones de capacidad y refrigeracion), y tambien
-     * la opcion de no asignar un paquete a ese camion. Al llegar al ultimo
-     * camion se evalua el peso total sin asignar y se actualiza la mejor
-     * solucion encontrada. Al recorrerel espacio de soluciones,
-     * garantiza encontrar la asignacion optima que minimiza el peso
-     * no asignado. Cada llamada recursiva cuenta como un estado generado.
+     * paquete se prueban todos los camiones validos (que cumplan las
+     * restricciones de capacidad y refrigeracion), y tambien se incluye un
+     * "camion de descarte" ficticio que representa la opcion de dejar el
+     * paquete sin asignar. Al llegar al ultimo paquete se evalua el peso
+     * total acumulado en el camion de descarte y se actualiza la mejor
+     * solucion encontrada si es menor a la actual. Al recorrer todo el
+     * espacio de soluciones, garantiza encontrar la asignacion optima que
+     * minimiza el peso no asignado. Cada llamada recursiva cuenta como un
+     * estado generado.
      */
 
 
     public Backtracking(HashMap<Camion, List<Paquete>> mejorSolucion, double mejorPesoNoAsignado, int estadosGenerados, List<Camion> camiones, List<Paquete> paquetes) {
         MejorSolucion = new HashMap<>();
         this.mejorPesoNoAsignado = mejorPesoNoAsignado;
-        this.estadosGenerados = estadosGenerados;
+        this.estadosGenerados = 0;
         this.camiones = camiones;
         this.paquetes = paquetes;
     }
@@ -37,51 +48,44 @@ public class Backtracking {
             for (Camion c : this.camiones) {
                 asignacion.put(c, new ArrayList<>());
             }
-            this.mejorPesoNoAsignado = this.paquetes.stream().mapToDouble(Paquete::getPesoKg).sum();
-            backtracking(0, 0, asignacion, 0);
+            camionDescarte = new Camion(0, "", true, 1000000000);
+            asignacion.put(camionDescarte, new ArrayList<>());
+
+            backtracking(0, asignacion);
         }
     }
 
-    private void backtracking(int camionActual, double pesoNoAsignado, HashMap<Camion, List<Paquete>> asignacion, int estados) {
-        if (camionActual == camiones.size()) {
-            double pesoSinAsignar = 0;
-            for (Paquete p : this.paquetes) {
-                boolean asignado = false;
-                for (List<Paquete> lista : asignacion.values()) {
-                    if (lista.contains(p)) {
-                        asignado = true;
-                        break;
-                    }
-                }
-                if (!asignado) {
-                    pesoSinAsignar += p.getPesoKg();
-                }
-            }
-            if (pesoSinAsignar < mejorPesoNoAsignado) {
-                mejorPesoNoAsignado = pesoSinAsignar;
+    private void backtracking(int indiceP, HashMap<Camion, List<Paquete>> asignacion) {
+        estadosGenerados++;
+
+        if (indiceP == this.paquetes.size()) {
+            double pesoNoAsignado = getPeso(camionDescarte, asignacion);
+            if (pesoNoAsignado < mejorPesoNoAsignado) {
+                mejorPesoNoAsignado = pesoNoAsignado;
                 MejorSolucion = copiarAsignacion(asignacion);
-                this.estadosGenerados = estados;
+
             }
         } else {
-            for (Paquete p : this.paquetes) {
-                boolean yaEstaAsignado = asignacion.values().stream().anyMatch(lista -> lista.contains(p));
+            Paquete paqueteActual = this.paquetes.get(indiceP);
 
-                if (!yaEstaAsignado) {
-                    if (!p.contieneAlimentos() || this.camiones.get(camionActual).estaRefrigerado()) {
-                        if (getPeso(camionActual, asignacion) + p.getPesoKg() <= this.camiones.get(camionActual).getCapacidadKg()) {
-                            asignacion.get(this.camiones.get(camionActual)).add(p);
-                            backtracking(camionActual, pesoNoAsignado + p.getPesoKg(), asignacion, estados + 1);
-                            asignacion.get(this.camiones.get(camionActual)).remove(p);
-                        }
-                    }
+            for (Camion c : asignacion.keySet()) {
+                boolean cumpleRefrigeracion = !paqueteActual.contieneAlimentos() || c.estaRefrigerado();
+                boolean entraEnCapacidad = getPeso(c, asignacion) + paqueteActual.getPesoKg() <= c.getCapacidadKg();
+
+                if (cumpleRefrigeracion && entraEnCapacidad) {
+                    asignacion.get(c).add(paqueteActual);
+                    backtracking(indiceP + 1, asignacion);
+                    asignacion.get(c).remove(paqueteActual);
                 }
             }
-            backtracking(camionActual + 1, pesoNoAsignado, asignacion, estados + 1);
+
+
+
         }
     }
 
-    private double getPeso(int indiceCamion, HashMap<Camion, List<Paquete>> asignacion) {
-        List<Paquete> paquetesDelCamion = asignacion.get(this.camiones.get(indiceCamion));
+    private double getPeso(Camion camion, HashMap<Camion, List<Paquete>> asignacion) {
+        List<Paquete> paquetesDelCamion = asignacion.get(camion);
         if (paquetesDelCamion == null) return 0;
         double total = 0;
         for (Paquete p : paquetesDelCamion) {

@@ -31,7 +31,7 @@ public class Greedy {
         asignacion = new HashMap<>();
         noAsignados = new ArrayList<>();
 
-        Map<Camion, Double> capacidadRestante = new HashMap<>();
+        HashMap<Camion, Double> capacidadRestante = new HashMap<>();
         for (Camion c : camiones) {
             capacidadRestante.put(c, c.getCapacidadKg());
         }
@@ -55,7 +55,12 @@ public class Greedy {
             }
 
             if (camionElegido != null) {
-                asignacion.computeIfAbsent(camionElegido, k -> new ArrayList<>()).add(paquete);
+                List<Paquete> paquetesCamion = asignacion.get(camionElegido);
+                if (paquetesCamion == null) {
+                    paquetesCamion = new ArrayList<>();
+                    asignacion.put(camionElegido, paquetesCamion);
+                }
+                paquetesCamion.add(paquete);
                 capacidadRestante.put(camionElegido, capacidadRestante.get(camionElegido) - paquete.getPesoKg());
             } else {
                 noAsignados.add(paquete);

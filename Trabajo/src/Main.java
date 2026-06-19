@@ -10,6 +10,7 @@ public class Main {
         camiones.add(new Camion(101, "AAA001B", false, 500));
         camiones.add(new Camion(102, "AAA002C", true,  115));
 
+
         List<Paquete> paquetes = new ArrayList<>();
         paquetes.add(new Paquete(1, "P001", 30,  true,  80));
         paquetes.add(new Paquete(2, "P002", 100, false, 2));

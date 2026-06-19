@@ -8,7 +8,6 @@ public class Servicios {
     private HashMap<String, Paquete> paquetesPorCodigo = new HashMap<>();
     private Map<Boolean, List<Paquete>> paquetesPorAlimento;
 
-    //para calcular costo computacional del constructor, evaluar el costo de cargarcamiones y cargar paquetes y de ahí viene el costo
     //Costo computacional cargarCamiones = O(n) donde N es cant. de camiones y cargarPaquetes = O(m) donde M es cant. de paquetes
     //Costo computacional del constructor = O(n) + O(m) = O(n + m)
     public Servicios(String pathCamiones, String pathPaquetes, Map<Boolean, List<Paquete>> paquetesPorAlimento) {
