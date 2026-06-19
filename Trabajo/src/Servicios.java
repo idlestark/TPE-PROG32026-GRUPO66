@@ -1,56 +1,27 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class Servicios {
 
     private HashMap<String, Paquete> paquetesPorCodigo = new HashMap<>();
     private Map<Boolean, List<Paquete>> paquetesPorAlimento;
+    private List<Camion> camiones;
 
-    //Costo computacional cargarCamiones = O(n) donde N es cant. de camiones y cargarPaquetes = O(m) donde M es cant. de paquetes
-    //Costo computacional del constructor = O(n) + O(m) = O(n + m)
-    public Servicios(String pathCamiones, String pathPaquetes, Map<Boolean, List<Paquete>> paquetesPorAlimento) {
-        cargarCamiones(pathCamiones);
-        cargarPaquetes(pathPaquetes);
+
+    //Costo computacional CSVReader.leerCamiones = O(n) donde n es cant. de camiones
+    //Costo computacional CSVReader.leerPaquetes = O(m) donde m es cant. de paquetes
+    //Costo computacional del constructor = O(n) + O(m) + O(m) = O(n + m)
+
+    public Servicios(String pathCamiones, String pathPaquetes) {
         paquetesPorAlimento = new HashMap<>();
         paquetesPorAlimento.put(true, new ArrayList<>());
         paquetesPorAlimento.put(false, new ArrayList<>());
-    }
 
-    private void cargarCamiones(String path) {
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            int total = Integer.parseInt(br.readLine().trim());
-            for (int i = 0; i < total; i++) {
-                String[] partes = br.readLine().trim().split(";");
-                int id = Integer.parseInt(partes[0]);
-                String patente = partes[1];
-                boolean refrigerado = partes[2].equals("1");
-                double capacidad = Double.parseDouble(partes[3]);
-                new Camion(id, patente, refrigerado, capacidad);
-            }
-        } catch (IOException e) {
-            System.out.println("Error leyendo camiones: " + e.getMessage());
-        }
-    }
+        camiones = CSVReader.leerCamiones(pathCamiones);
 
-    private void cargarPaquetes(String path) {
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            int total = Integer.parseInt(br.readLine().trim());
-            for (int i = 0; i < total; i++) {
-                String[] partes = br.readLine().trim().split(";");
-                int id = Integer.parseInt(partes[0]);
-                String codigo = partes[1];
-                double peso = Double.parseDouble(partes[2]);
-                boolean alimentos = partes[3].equals("1");
-                int urgencia = Integer.parseInt(partes[4]);
-                Paquete paquete = new Paquete(id, codigo, peso, alimentos, urgencia);
-                //Ahora se carga la lista de factoreo
-                paquetesPorCodigo.put(codigo, paquete);
-                paquetesPorAlimento.get(alimentos).add(paquete);
-            }
-        } catch (IOException e) {
-            System.out.println("Error leyendo paquetes: " + e.getMessage());
+        List<Paquete> paquetesLeidos = CSVReader.leerPaquetes(pathPaquetes);
+        for (Paquete p : paquetesLeidos) {
+            paquetesPorCodigo.put(p.getCodigoPaquete(), p);
+            paquetesPorAlimento.get(p.contieneAlimentos()).add(p);
         }
     }
 
@@ -87,5 +58,9 @@ public class Servicios {
             }
         }
         return paquetes;
+    }
+
+    public List<Camion> getCamiones() {
+        return camiones;
     }
 }

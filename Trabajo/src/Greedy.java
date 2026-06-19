@@ -10,8 +10,12 @@ public class Greedy {
      * Estrategia de resolucion: se ordenan los paquetes por peso descendente,
      * priorizando asignar primero los paquetes mas pesados (la idea es que
      * son los mas dificiles de ubicar mas adelante si quedan camiones con
-     * poca capacidad libre). Luego, para cada paquete en ese orden, se
-     * recorren los camiones en el orden en que fueron cargados y se asigna
+     * poca capacidad libre). Tambien se ordenan los camiones dejando los
+     * refrigerados al final, para reservarlos en lo posible solo para los
+     * paquetes que efectivamente contienen alimentos, evitando que se
+     * llenen con paquetes que no los necesitan y dejando sin lugar a
+     * paquetes con alimentos mas adelante. Luego, para cada paquete en el
+     * orden establecido, se recorren los camiones en ese orden y se asigna
      * al PRIMER camion que cumpla las dos restricciones: tener capacidad
      * libre suficiente y, si el paquete contiene alimentos, estar
      * refrigerado. Si ningun camion cumple, el paquete queda sin asignar. A
@@ -31,8 +35,12 @@ public class Greedy {
         asignacion = new HashMap<>();
         noAsignados = new ArrayList<>();
 
+
+        List<Camion> camionesOrdenados = new ArrayList<>(camiones);
+        camionesOrdenados.sort((c1, c2) -> Boolean.compare(c1.estaRefrigerado(), c2.estaRefrigerado()));
+
         HashMap<Camion, Double> capacidadRestante = new HashMap<>();
-        for (Camion c : camiones) {
+        for (Camion c : camionesOrdenados) {
             capacidadRestante.put(c, c.getCapacidadKg());
         }
 
@@ -42,7 +50,7 @@ public class Greedy {
         for (Paquete paquete : paquetesOrdenados) {
             Camion camionElegido = null;
 
-            for (Camion camion : camiones) {
+            for (Camion camion : camionesOrdenados) {
                 candidatosConsiderados++;
 
                 boolean cabe = paquete.getPesoKg() <= capacidadRestante.get(camion);
